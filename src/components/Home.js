@@ -1,9 +1,11 @@
 import "../App.css";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Carousel from "./Carousel";
 import Trending from "../pages/Trending";
 import "../style/landingPage.css";
+import { useDispatch, useSelector } from "react-redux";
+import { getMovies } from "../redux/features/movieSlicer";
 
 // // Import Swiper React components
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -12,15 +14,14 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 
 function Home() {
-  const [Movies, setMovies] = useState([]);
+  const { Movies } = useSelector((state) => state.movies);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    fetch("https://notflixtv.herokuapp.com/api/v1/movies?page=undefined")
-      .then((Response) => Response.json())
-      .then((results) => {
-        setMovies(results.data.docs);
-      });
-  }, []);
+    // getData();
+    dispatch(getMovies());
+  }, [dispatch]);
 
   const navigate = useNavigate();
 
@@ -50,7 +51,7 @@ function Home() {
           }}
           className="mySwiper"
         >
-          {Movies.map((film) => (
+          {Movies?.data?.docs.map((film) => (
             <SwiperSlide>
               <span onClick={() => navigate("/Detail/" + film._id)}>
                 <div
@@ -99,7 +100,6 @@ function Home() {
               </span>
             </SwiperSlide>
           ))}
-          ;
         </Swiper>
       </div>
       <div style={{ background: "#f1f5f9" }}>
