@@ -18,14 +18,23 @@ import { BiUserCircle } from "react-icons/bi/";
 
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getLogin,
+  getRegist,
+  getOauth,
+  logout,
+} from "../redux/features/auth/authSlice";
+
 let dataLocal = false;
-const dataLocalStr = localStorage.getItem("user");
+const dataLocalStr = localStorage.getItem("data");
 if (dataLocalStr) dataLocal = JSON.parse(dataLocalStr);
 
 const NavigationBar = () => {
   const navigate = useNavigate();
   const [, setsearchInput] = useState("");
   const { name } = useParams();
+
   const [show, setShow] = useState(false);
   const [showRegist, setShowRegist] = useState(false);
 
@@ -53,12 +62,10 @@ const NavigationBar = () => {
   const [PasswordregistdInput, setPasswordregistlInput] = useState();
   const [PasswordconfirmationInput, setPasswordconfirmationlInput] = useState();
 
-  const [Inputlogin, setInputlogin] = useState(!!dataLocal);
-
   const handleShowclose = () => setShow(false);
   const handleRegistclose = () => setShowRegist(false);
 
-  const [data, setdata] = useState(dataLocal);
+  const [data] = useState(dataLocal);
 
   const Eye = () => {
     if (password === "password") {
@@ -96,99 +103,20 @@ const NavigationBar = () => {
     }
   };
 
-  // login
-  const login = () => {
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
+  // login & regist
+  const { login, Inputlogin } = useSelector((state) => state.login);
 
-    const raw = JSON.stringify({
-      email: emailInput,
-      password: passwordInput,
-    });
-
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-      redirect: "follow",
-    };
-
-    fetch("https://notflixtv.herokuapp.com/api/v1/users/login", requestOptions)
-      .then((response) => response.json())
-      .then((data) => {
-        setdata(data.data);
-
-        if (data.status === true) {
-          handleShowclose();
-          setInputlogin(true);
-        }
-        setemailInput(undefined);
-        setpasswordlInput(undefined);
-        localStorage.setItem("data", JSON.stringify(data.data));
-      })
-      .catch((error) => console.log("error", error));
-  };
+  const dispatch = useDispatch();
 
   // OAuth login
   const credentialResponse = (credential) => {
-    console.log("credential", credential);
+    dispatch(getOauth(credential));
     handleShowclose();
-    setInputlogin(true);
-
-    localStorage.setItem("token", JSON.stringify(credential.credential));
-    localStorage.setItem("user", JSON.stringify({ first_name: "GoogleUser" }));
-    setdata({ first_name: "Google User" });
-  };
-
-  // gapi.load("client:auth2", () => {
-  //   gapi.auth2.init({
-  //     clientId:
-  //       "1016231200394-24ufdrehmu4j2chnafgrf2047c1i8i0r.apps.googleusercontent.com",
-  //     plugin_name: "",
-  //   });
-  // });
-
-  // Regist
-  const Regist = () => {
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-
-    const raw = JSON.stringify({
-      first_name: FirstnameInput,
-      last_name: LastnameInput,
-      email: EmailregistInput,
-      password: PasswordregistdInput,
-      password_confirmation: PasswordconfirmationInput,
-    });
-
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-      redirect: "follow",
-    };
-
-    fetch("https://notflixtv.herokuapp.com/api/v1/users", requestOptions)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === true) {
-          handleRegistclose();
-          setInputlogin(true);
-        }
-        setFirstnameInput(undefined);
-        setLastnameInput(undefined);
-        setEmailRegistInput(undefined);
-        setPasswordregistlInput(undefined);
-        setPasswordconfirmationlInput(undefined);
-
-        localStorage.setItem("data", JSON.stringify(data));
-      })
-      .catch((error) => console.log("error", error));
   };
 
   useEffect(() => {
     if (name) setsearchInput(name);
-  }, [name]);
+  }, [name, setsearchInput]);
 
   // function validate Login
   const validateEmail = () => {
@@ -404,7 +332,12 @@ const NavigationBar = () => {
                   style={{ border: "transparent", marginTop: "-30px" }}
                 >
                   <Button
-                    onClick={login}
+                    onClick={() => {
+                      dispatch(getLogin({ passwordInput, emailInput }));
+                      setemailInput(undefined);
+                      setpasswordlInput(undefined);
+                      handleShowclose();
+                    }}
                     variant="danger"
                     style={{
                       borderRadius: "20px",
@@ -412,7 +345,7 @@ const NavigationBar = () => {
                       height: "40px",
                     }}
                   >
-                    Login
+                    Login now
                   </Button>
                   {Inputlogin === true ? (
                     ""
@@ -634,7 +567,23 @@ const NavigationBar = () => {
                   style={{ border: "transparent", marginTop: "-30px" }}
                 >
                   <Button
-                    onClick={Regist}
+                    onClick={() => {
+                      dispatch(
+                        getRegist({
+                          FirstnameInput,
+                          LastnameInput,
+                          EmailregistInput,
+                          PasswordregistdInput,
+                          PasswordconfirmationInput,
+                        })
+                      );
+                      setFirstnameInput(undefined);
+                      setLastnameInput(undefined);
+                      setEmailRegistInput(undefined);
+                      setPasswordregistlInput(undefined);
+                      setPasswordconfirmationlInput(undefined);
+                      handleRegistclose();
+                    }}
                     variant="danger"
                     style={{
                       borderRadius: "30px",
@@ -686,20 +635,14 @@ const NavigationBar = () => {
                       marginTop: "10px",
                     }}
                   >
-                    {data.first_name}
-                    {data.last_name}
+                    {login.data.first_name}
+                    {login.data.last_name}
                   </p>
 
                   <Button
                     onClick={() => {
-                      setInputlogin(false);
-                      setemailInput(undefined);
-                      setpasswordlInput(undefined);
-                      setFirstnameInput(undefined);
-                      setLastnameInput(undefined);
-                      setEmailRegistInput(undefined);
-                      setPasswordregistlInput(undefined);
-                      setPasswordconfirmationlInput(undefined);
+                      dispatch(logout());
+                      handleShowclose();
                       localStorage.clear();
                     }}
                     className="align-items-center"

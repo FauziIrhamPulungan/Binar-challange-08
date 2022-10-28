@@ -1,17 +1,20 @@
 import React from "react";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getAll } from "../redux/features/allSlice";
 
 function All() {
-  const [movie, setMovie] = useState([]);
+  const { All } = useSelector((state) => state.all);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    fetch("https://notflixtv.herokuapp.com/api/v1/movies?search=&page=1")
-      .then((Response) => Response.json())
-      .then((results) => setMovie(results.data.docs));
-  }, []);
+    // getData();
+    dispatch(getAll());
+  }, [dispatch]);
+
   return (
     <div>
       <div style={{ position: "relative" }}>
@@ -53,21 +56,46 @@ function All() {
               gap: "1rem",
             }}
           >
-            {movie.map((film) => (
+            {All?.results?.map((film) => (
               <div>
-                <span onClick={() => navigate("/Detail/" + film._id)}>
+                <span onClick={() => navigate("/Detail/" + film.id)}>
                   <div
+                    className="card"
                     style={{
-                      color: "black",
+                      background: "black",
                       borderRadius: "10px",
                       width: "250px",
                       height: "400px",
                       marginLeft: "50px",
                       marginBottom: "50px",
+                      overflow: "hidden",
+                      position: "relative",
                     }}
                   >
+                    <div
+                      className="card-info"
+                      style={{
+                        position: "absolute",
+                        bottom: 0,
+                        left: 0,
+                        width: "100%",
+                        color: "black",
+                      }}
+                    >
+                      <h5
+                        style={{
+                          marginLeft: "25px",
+                          color: "white",
+                        }}
+                      >
+                        {film.title}
+                      </h5>
+                      <p style={{ marginLeft: "25px", color: "white" }}>
+                        ⭐ {(film.vote_average / 2).toFixed(1)} / 5
+                      </p>
+                    </div>
                     <img
-                      src={"https://image.tmdb.org/t/p/w500" + film.poster}
+                      src={"https://image.tmdb.org/t/p/w500" + film.poster_path}
                       alt=""
                       style={{
                         width: "100%",

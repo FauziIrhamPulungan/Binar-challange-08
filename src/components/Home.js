@@ -51,9 +51,9 @@ function Home() {
           }}
           className="mySwiper"
         >
-          {Movies?.data?.docs.map((film) => (
+          {Movies?.results?.map((film) => (
             <SwiperSlide>
-              <span onClick={() => navigate("/Detail/" + film._id)}>
+              <span onClick={() => navigate("/Detail/" + film.id)}>
                 <div
                   className="card"
                   style={{
@@ -71,7 +71,7 @@ function Home() {
                       bottom: 0,
                       left: 0,
                       width: "100%",
-                      color: "white",
+                      color: "black",
                     }}
                   >
                     <h5
@@ -83,12 +83,12 @@ function Home() {
                       {film.title}
                     </h5>
                     <p style={{ marginLeft: "25px", color: "white" }}>
-                      ⭐ {(film.rating / 2).toFixed(1)} / 5
+                      ⭐ {(film.vote_average / 2).toFixed(1)} / 5
                     </p>
                   </div>
                   <img
                     className="cardimage"
-                    src={"https://image.tmdb.org/t/p/w500" + film.poster}
+                    src={"https://image.tmdb.org/t/p/w500" + film.poster_path}
                     alt=""
                     style={{
                       width: "100%",

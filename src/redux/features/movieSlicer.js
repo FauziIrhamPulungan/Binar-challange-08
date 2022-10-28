@@ -6,9 +6,10 @@ const initialState = {
 };
 
 export const getMovies = createAsyncThunk("movies/getMovies", async () => {
-  const response = await fetch("https://notflixtv.herokuapp.com/api/v1/movies");
+  const response = await fetch(
+    "https://api.themoviedb.org/3/movie/popular?api_key=57b75fd3bb7f3e28a2362d6568184208"
+  );
   const result = await response.json();
-  //   console.log("result", result);
   return result;
 });
 
