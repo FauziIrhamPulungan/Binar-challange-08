@@ -80,7 +80,8 @@ export const authSlice = createSlice({
     },
 
     [getLogin.rejected]: (state, { payload }) => {
-      console.log(payload);
+      state.loading = false;
+      state.data = payload;
     },
 
     // regist
