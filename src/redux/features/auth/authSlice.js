@@ -1,4 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import {
+  logInWithEmailAndPassword,
+  registerWithEmailAndPassword,
+  signInWithGoogle,
+} from "../../../Firebase";
 
 let dataLocal = false;
 const dataLocalStr = localStorage.getItem("data");
@@ -14,67 +19,45 @@ const initialState = {
 
 export const getLogin = createAsyncThunk(
   "login/getLogin",
-  async ({ passwordInput, emailInput }) => {
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-
-    const raw = JSON.stringify({
-      email: emailInput,
-      password: passwordInput,
-    });
-
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-      redirect: "follow",
-    };
-    const response = await fetch(
-      "https://notflixtv.herokuapp.com/api/v1/users/login",
-      requestOptions
-    );
-    const data = await response.json();
+  async ({ emailInput, passwordInput }) => {
+    if (!emailInput || !passwordInput) throw alert("masukin input yang bener");
+    const data = await logInWithEmailAndPassword(emailInput, passwordInput);
+    if (!data) throw new Error("gada data");
     return data;
   }
 );
 
 export const getRegist = createAsyncThunk(
   "login/getRegist",
-  async ({
-    FirstnameInput,
-    LastnameInput,
-    EmailregistInput,
-    PasswordregistdInput,
-    PasswordconfirmationInput,
-  }) => {
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
+  async ({ nameInput, EmailregistInput, PasswordregistdInput }) => {
+    if (!nameInput || !EmailregistInput || !PasswordregistdInput)
+      throw alert("masukin input yang benar");
 
-    const raw = JSON.stringify({
-      first_name: FirstnameInput,
-      last_name: LastnameInput,
-      email: EmailregistInput,
-      password: PasswordregistdInput,
-      password_confirmation: PasswordconfirmationInput,
-    });
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-      redirect: "follow",
-    };
-
-    const response = await fetch(
-      "https://notflixtv.herokuapp.com/api/v1/users",
-      requestOptions
+    const data = await registerWithEmailAndPassword(
+      nameInput,
+      EmailregistInput,
+      PasswordregistdInput
     );
-    const data = await response.json();
-    return data;
+    if (!data) throw new Error("gada data");
+
+    return {
+      user: {
+        email: data.user.email,
+      },
+    };
   }
 );
 
-export const getOauth = createAsyncThunk("login/getOauth", async (data) => {
-  return data;
+export const getOauth = createAsyncThunk("login/getOauth", async () => {
+  const data = await signInWithGoogle();
+
+  return {
+    user: {
+      name: data.user.displayName,
+      email: data.user.email,
+      photoURL: data.user.photoURL,
+    },
+  };
 });
 
 export const authSlice = createSlice({
@@ -91,20 +74,13 @@ export const authSlice = createSlice({
       state.loading = true;
     },
     [getLogin.fulfilled]: (state, { payload }) => {
-      state.loading = false;
       state.login = payload;
-      if (payload.status === true) {
-        state.show = false;
-        state.Inputlogin = true;
-        localStorage.setItem("data", JSON.stringify(payload));
-        localStorage.setItem("token", JSON.stringify(payload.data.token));
-      }
-      state.emailInput = undefined;
-      state.passwordInput = undefined;
+      state.Inputlogin = true;
+      localStorage.setItem("data", JSON.stringify(payload));
     },
+
     [getLogin.rejected]: (state, { payload }) => {
-      state.loading = false;
-      state.data = payload;
+      console.log(payload);
     },
 
     // regist
@@ -114,17 +90,8 @@ export const authSlice = createSlice({
     [getRegist.fulfilled]: (state, { payload }) => {
       state.loading = false;
       state.login = payload;
-      if (payload.status === true) {
-        state.show = false;
-        state.Inputlogin = true;
-        localStorage.setItem("data", JSON.stringify(payload));
-        localStorage.setItem("token", JSON.stringify(payload.data.token));
-      }
-      state.FirstnameInput = undefined;
-      state.LastnameInput = undefined;
-      state.EmailregistInput = undefined;
-      state.PasswordregistdInput = undefined;
-      state.PasswordconfirmationInput = undefined;
+      state.Inputlogin = true;
+      localStorage.setItem("data", JSON.stringify(payload));
     },
 
     [getRegist.rejected]: (state, { payload }) => {
@@ -134,22 +101,18 @@ export const authSlice = createSlice({
 
     // oauth
     [getOauth.pending]: (state) => {
+      console.log("pending");
       state.loading = true;
     },
     [getOauth.fulfilled]: (state, { payload }) => {
-      const data = { first_name: "Google", last_name: "user" };
       state.loading = false;
-      state.login = { data };
-      if (!!payload.credential === true) {
-        state.show = false;
-        state.Inputlogin = true;
-        localStorage.setItem("token", JSON.stringify(payload.credential));
-        localStorage.setItem("data", JSON.stringify({ data }));
-      }
+      state.login = payload;
+      state.Inputlogin = true;
+      localStorage.setItem("data", JSON.stringify(payload));
     },
     [getOauth.rejected]: (state) => {
+      console.log("rejected");
       state.loading = false;
-      // state.user = payload;
     },
   },
 });
