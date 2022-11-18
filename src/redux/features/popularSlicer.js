@@ -13,7 +13,7 @@ export const getMovies = createAsyncThunk("movies/getMovies", async () => {
   return result;
 });
 
-export const movieSlicer = createSlice({
+export const popularSlicer = createSlice({
   name: "movies",
   initialState,
   reducers: {},
@@ -31,4 +31,4 @@ export const movieSlicer = createSlice({
   },
 });
 
-export default movieSlicer.reducer;
+export default popularSlicer.reducer;

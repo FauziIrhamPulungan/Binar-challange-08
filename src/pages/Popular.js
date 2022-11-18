@@ -1,24 +1,19 @@
 import React from "react";
 
-import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getSearch } from "../redux/features/searchSlice";
+import { getAll } from "../redux/features/allSlice";
 
-function Search() {
-  let { name } = useParams();
+function Popular() {
+  const { All } = useSelector((state) => state.all);
   const navigate = useNavigate();
-  if (!name) navigate("/");
-
-  const { Search } = useSelector((state) => state.search);
-
   const dispatch = useDispatch();
 
   useEffect(() => {
     // getData();
-    dispatch(getSearch(name));
-  }, [dispatch, name]);
+    dispatch(getAll());
+  }, [dispatch]);
 
   return (
     <div>
@@ -48,25 +43,25 @@ function Search() {
               padding: "50px",
             }}
           >
-            All Movies "
-            <span style={{ textTransform: "uppercase" }}>{name}</span>"
+            Popular Movies
           </h1>
         </div>
         <div>
           <h1 style={{ padding: "50px", marginTop: "50px", color: "white" }}>
-            Search Result "{name}"
+            Popular Movies
           </h1>
+
           <div
-            className="cards"
+            className="cardp"
             style={{
               padding: "30px",
               // display: "grid",
               gridTemplateColumns: "repeat(4, minmax(0, 1fr)",
-              // gap: "1rem",
+              //     // gap: "1rem",
               marginBottom: "50px",
             }}
           >
-            {Search?.map((film) => (
+            {All?.results?.map((film) => (
               <div>
                 <span onClick={() => navigate("/Detail/" + film.id)}>
                   <div
@@ -121,16 +116,17 @@ function Search() {
               </div>
             ))}
           </div>
+
           <footer
             className="d-flex justify-content-center"
             style={{ background: "red" }}
           >
             <span style={{ color: "white" }}>&copy;2022 Created by FiP</span>
-          </footer>{" "}
+          </footer>
         </div>
       </div>
     </div>
   );
 }
 
-export default Search;
+export default Popular;

@@ -7,7 +7,7 @@ const initialState = {
 
 export const getAll = createAsyncThunk("all/getAll", async () => {
   const response = await fetch(
-    "https://api.themoviedb.org/3/discover/movie?api_key=57b75fd3bb7f3e28a2362d6568184208"
+    "https://api.themoviedb.org/3/movie/popular?api_key=57b75fd3bb7f3e28a2362d6568184208"
   );
   const result = await response.json();
   return result;
