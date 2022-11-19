@@ -567,6 +567,7 @@ const NavigationBar = () => {
               className="d-flex align-items-center"
               style={{
                 gap: "1rem",
+                zIndex: "20px",
               }}
             >
               {login.user.photoURL ? (
